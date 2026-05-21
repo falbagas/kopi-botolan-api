@@ -1,0 +1,185 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum Role {
+  ADMIN
+  MANAJER
+  KOPERASI
+}
+
+enum StatusPengiriman {
+  PROSES
+  TERKIRIM
+  RETUR
+}
+
+model User {
+  id            String   @id @default(uuid())
+  name          String
+  email         String   @unique
+  passwordHash  String   @map("password_hash")
+  role          Role     @default(KOPERASI)
+  isActive      Boolean  @default(true) @map("is_active")
+  koperasiId    String?  @map("koperasi_id")
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  koperasi        Koperasi?        @relation(fields: [koperasiId], references: [id])
+  produksiBatch   ProduksiBatch[]
+  pengiriman      Pengiriman[]
+  penjualan       Penjualan[]
+  hppHistory      HppHistory[]
+
+  @@map("users")
+}
+
+model Koperasi {
+  id            String   @id @default(uuid())
+  name          String
+  address       String?
+  contactPerson String?  @map("contact_person")
+  phone         String?
+  minStockAlert Int      @default(20) @map("min_stock_alert")
+  isActive      Boolean  @default(true) @map("is_active")
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  users         User[]
+  pengiriman    Pengiriman[]
+  stokKoperasi  StokKoperasi[]
+  penjualan     Penjualan[]
+  hargaJual     HargaJual[]
+
+  @@map("koperasi")
+}
+
+model HppHistory {
+  id             String   @id @default(uuid())
+  biayaBahan     Decimal  @map("biaya_bahan")
+  biayaProduksi  Decimal  @map("biaya_produksi")
+  biayaLain      Decimal  @default(0) @map("biaya_lain")
+  totalHpp       Decimal  @map("total_hpp")
+  berlakuDari    DateTime @map("berlaku_dari")
+  keterangan     String?
+  createdById    String   @map("created_by")
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  createdBy       User            @relation(fields: [createdById], references: [id])
+  produksiBatch   ProduksiBatch[]
+  penjualan       Penjualan[]
+
+  @@map("hpp_history")
+}
+
+model HargaJual {
+  id          String   @id @default(uuid())
+  harga       Decimal
+  berlakuDari DateTime @map("berlaku_dari")
+  koperasiId  String?  @map("koperasi_id")
+  keterangan  String?
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  koperasi  Koperasi?   @relation(fields: [koperasiId], references: [id])
+  penjualan Penjualan[]
+
+  @@map("harga_jual")
+}
+
+model ProduksiBatch {
+  id              String   @id @default(uuid())
+  batchCode       String   @unique @map("batch_code")
+  tanggalProduksi DateTime @map("tanggal_produksi")
+  expiredDate     DateTime @map("expired_date")
+  jumlahBotol     Int      @map("jumlah_botol")
+  catatan         String?
+  hppId           String   @map("hpp_id")
+  createdById     String   @map("created_by")
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  hpp          HppHistory     @relation(fields: [hppId], references: [id])
+  createdBy    User           @relation(fields: [createdById], references: [id])
+  stokFreezer  StokFreezer?
+  pengiriman   Pengiriman[]
+  stokKoperasi StokKoperasi[]
+  penjualan    Penjualan[]
+
+  @@map("produksi_batch")
+}
+
+model StokFreezer {
+  id          String   @id @default(uuid())
+  batchId     String   @unique @map("batch_id")
+  jumlahMasuk Int      @map("jumlah_masuk")
+  jumlahKeluar Int     @default(0) @map("jumlah_keluar")
+  stokAkhir   Int      @map("stok_akhir")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  batch ProduksiBatch @relation(fields: [batchId], references: [id])
+
+  @@map("stok_freezer")
+}
+
+model Pengiriman {
+  id           String           @id @default(uuid())
+  batchId      String           @map("batch_id")
+  koperasiId   String           @map("koperasi_id")
+  jumlahBotol  Int              @map("jumlah_botol")
+  tanggalKirim DateTime         @map("tanggal_kirim")
+  status       StatusPengiriman @default(PROSES)
+  catatan      String?
+  dikirimOlehId String          @map("dikirim_oleh")
+  createdAt    DateTime         @default(now()) @map("created_at")
+
+  batch        ProduksiBatch  @relation(fields: [batchId], references: [id])
+  koperasi     Koperasi       @relation(fields: [koperasiId], references: [id])
+  dikirimOleh  User           @relation(fields: [dikirimOlehId], references: [id])
+  stokKoperasi StokKoperasi[]
+
+  @@map("pengiriman")
+}
+
+model StokKoperasi {
+  id           String   @id @default(uuid())
+  koperasiId   String   @map("koperasi_id")
+  batchId      String   @map("batch_id")
+  pengirimanId String?  @map("pengiriman_id")
+  stokMasuk    Int      @default(0) @map("stok_masuk")
+  stokTerjual  Int      @default(0) @map("stok_terjual")
+  stokRetur    Int      @default(0) @map("stok_retur")
+  stokAkhir    Int      @map("stok_akhir")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  koperasi   Koperasi      @relation(fields: [koperasiId], references: [id])
+  batch      ProduksiBatch @relation(fields: [batchId], references: [id])
+  pengiriman Pengiriman?   @relation(fields: [pengirimanId], references: [id])
+
+  @@map("stok_koperasi")
+}
+
+model Penjualan {
+  id              String   @id @default(uuid())
+  koperasiId      String   @map("koperasi_id")
+  batchId         String   @map("batch_id")
+  hppId           String   @map("hpp_id")
+  hargaJualId     String   @map("harga_jual_id")
+  jumlahTerjual   Int      @map("jumlah_terjual")
+  totalPendapatan Decimal  @map("total_pendapatan")
+  totalHpp        Decimal  @map("total_hpp")
+  labaKotor       Decimal  @map("laba_kotor")
+  tanggalJual     DateTime @map("tanggal_jual")
+  dicatatOlehId   String   @map("dicatat_oleh")
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  koperasi    Koperasi   @relation(fields: [koperasiId], references: [id])
+  batch       ProduksiBatch @relation(fields: [batchId], references: [id])
+  hpp         HppHistory @relation(fields: [hppId], references: [id])
+  hargaJual   HargaJual  @relation(fields: [hargaJualId], references: [id])
+  dicatatOleh User       @relation(fields: [dicatatOlehId], references: [id])
+
+  @@map("penjualan")
+}
