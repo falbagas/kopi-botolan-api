@@ -6,11 +6,11 @@ const prisma = new PrismaClient();
 async function main() {
   const hash = await bcrypt.hash('admin123', 10);
   const user = await prisma.user.upsert({
-    where: { email: 'admin@brewandstirr.com' },
+    where: { email: 'admin@kopibotolan.com' },
     update: {},
     create: {
       name: 'Admin Pusat',
-      email: 'admin@brewandstirr.com',
+      email: 'admin@kopibotolan.com',
       passwordHash: hash,
       role: 'ADMIN',
     }
