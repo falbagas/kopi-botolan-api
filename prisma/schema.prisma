@@ -35,6 +35,7 @@ model User {
   pengiriman      Pengiriman[]
   penjualan       Penjualan[]
   hppHistory      HppHistory[]
+  pembayaran      Pembayaran[]
 
   @@map("users")
 }
@@ -54,6 +55,7 @@ model Koperasi {
   stokKoperasi  StokKoperasi[]
   penjualan     Penjualan[]
   hargaJual     HargaJual[]
+  pembayaran    Pembayaran[]
 
   @@map("koperasi")
 }
@@ -112,12 +114,12 @@ model ProduksiBatch {
 }
 
 model StokFreezer {
-  id          String   @id @default(uuid())
-  batchId     String   @unique @map("batch_id")
-  jumlahMasuk Int      @map("jumlah_masuk")
-  jumlahKeluar Int     @default(0) @map("jumlah_keluar")
-  stokAkhir   Int      @map("stok_akhir")
-  updatedAt   DateTime @updatedAt @map("updated_at")
+  id           String   @id @default(uuid())
+  batchId      String   @unique @map("batch_id")
+  jumlahMasuk  Int      @map("jumlah_masuk")
+  jumlahKeluar Int      @default(0) @map("jumlah_keluar")
+  stokAkhir    Int      @map("stok_akhir")
+  updatedAt    DateTime @updatedAt @map("updated_at")
 
   batch ProduksiBatch @relation(fields: [batchId], references: [id])
 
@@ -126,7 +128,7 @@ model StokFreezer {
 
 model Pengiriman {
   id           String           @id @default(uuid())
-  batchId      String           @map("batch_id")
+  batchId      String?          @map("batch_id")
   koperasiId   String           @map("koperasi_id")
   jumlahBotol  Int              @map("jumlah_botol")
   tanggalKirim DateTime         @map("tanggal_kirim")
@@ -135,10 +137,11 @@ model Pengiriman {
   dikirimOlehId String          @map("dikirim_oleh")
   createdAt    DateTime         @default(now()) @map("created_at")
 
-  batch        ProduksiBatch  @relation(fields: [batchId], references: [id])
+  batch        ProduksiBatch?  @relation(fields: [batchId], references: [id])
   koperasi     Koperasi       @relation(fields: [koperasiId], references: [id])
   dikirimOleh  User           @relation(fields: [dikirimOlehId], references: [id])
   stokKoperasi StokKoperasi[]
+  detail  PengirimanDetail[]
 
   @@map("pengiriman")
 }
@@ -183,3 +186,43 @@ model Penjualan {
 
   @@map("penjualan")
 }
+
+model JenisKopi {
+  id        String   @id @default(uuid())
+  nama      String   @unique
+  isActive  Boolean  @default(true) @map("is_active")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  pengirimanDetail PengirimanDetail[]
+
+  @@map("jenis_kopi")
+}
+
+model PengirimanDetail {
+  id           String   @id @default(uuid())
+  pengirimanId String   @map("pengiriman_id")
+  jenisKopiId  String   @map("jenis_kopi_id")
+  jumlahBotol  Int      @map("jumlah_botol")
+  keterangan   String?
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  pengiriman Pengiriman @relation(fields: [pengirimanId], references: [id], onDelete: Cascade)
+  jenisKopi  JenisKopi  @relation(fields: [jenisKopiId], references: [id])
+
+  @@map("pengiriman_detail")
+}
+
+model Pembayaran {
+  id            String   @id @default(uuid())
+  koperasiId    String   @map("koperasi_id")
+  jumlahBotol   Int      @map("jumlah_botol")
+  tanggalBayar  DateTime @map("tanggal_bayar")
+  keterangan    String?
+  dicatatOlehId String   @map("dicatat_oleh")
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  koperasi    Koperasi @relation(fields: [koperasiId], references: [id])
+  dicatatOleh User     @relation(fields: [dicatatOlehId], references: [id])
+
+  @@map("pembayaran")
+  }
