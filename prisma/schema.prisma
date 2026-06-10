@@ -36,6 +36,7 @@ model User {
   penjualan       Penjualan[]
   hppHistory      HppHistory[]
   pembayaran      Pembayaran[]
+  transaksi       Transaksi[]
 
   @@map("users")
 }
@@ -225,4 +226,56 @@ model Pembayaran {
   dicatatOleh User     @relation(fields: [dicatatOlehId], references: [id])
 
   @@map("pembayaran")
+  }
+
+  enum KategoriMenu {
+    MAKANAN
+    MINUMAN
+  }
+
+  enum MetodeBayar {
+    CASH
+    QRIS
+  }
+
+  model Menu {
+    id        String        @id @default(uuid())
+    nama      String        
+    harga     Decimal
+    kategori  KategoriMenu
+    isActive  Boolean       @default(true) @map("is_active")
+    createdAt DateTime      @default(now()) @map("created_at")
+
+    transaksiDetail TransaksiDetail[]
+
+    @@map("menu")
+  }
+
+  model Transaksi {
+    id            String          @id @default(uuid())
+    tanggal       DateTime        @default(now())
+    MetodeBayar   MetodeBayar     @map("metode_bayar")
+    totalHarga    Decimal         @map("total_harga")
+    namaPembeli   String?         @map("nama_pembeli")
+    createdById   String          @map("created_by")
+    createdAt     DateTime        @default(now()) @map("created_at")
+
+    createdBy User                  @relation(fields: [createdById], references: [id])
+    detail    TransaksiDetail[]
+
+    @@map("transaksi")
+  }
+
+  model TransaksiDetail {
+    id            String    @id @default(uuid())
+    transaksiId   String    @map("transaksi_id")
+    menuId        String    @map("menu_id")
+    jumlah        Int
+    hargaSatuan   Decimal   @map("harga_satuan")
+    subtotal      Decimal   
+
+    transaksi Transaksi @relation(fields: [transaksiId], references: [id], onDelete: Cascade)
+    menu      Menu      @relation(fields: [menuId], references: [id])
+
+    @@map("transaksi_detail")
   }
