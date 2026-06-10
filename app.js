@@ -10,6 +10,7 @@ const koperasiRoutes = require('./src/routes/koperasi.routes');
 const hppRoutes = require('./src/routes/hpp.routes');
 const penjualanRoutes = require('./src/routes/penjualan.routes');
 const laporanRoutes = require('./src/routes/laporan.routes');
+const posRoutes = require('./src/routes/pos.routes')
 
 const app = express();
 
@@ -26,6 +27,7 @@ app.use('/api/koperasi', koperasiRoutes);
 app.use('/api/hpp', hppRoutes);
 app.use('/api/penjualan', penjualanRoutes);
 app.use('/api/laporan', laporanRoutes);
+app.use('/api/pos', posRoutes)
 
 app.use((req, res) => res.status(404).json({ message: 'Route tidak ditemukan' }));
 
