@@ -38,6 +38,7 @@ model User {
   pembayaran      Pembayaran[]
   transaksi       Transaksi[]
   produksi        Produksi[]
+  resepHpp        ResepHpp[]
 
   @@map("users")
 }
@@ -304,6 +305,7 @@ model RasaKopi {
   createdAt DateTime @default(now()) @map("created_at")
 
   produksiBotolan ProduksiBotolan[]
+  resepHpp        ResepHpp[]
 
   @@map("rasa_kopi")
 }
@@ -350,4 +352,48 @@ model ProduksiDetail {
   bahanBaku  BahanBaku @relation(fields: [bahanBakuId], references: [id])
 
   @@map("produksi_detail")
+}
+
+model BahanHpp {
+  id           String   @id @default(uuid())
+  nama         String   @unique
+  satuan       String
+  hargaPerUnit Decimal  @map("harga_per_unit")
+  beratPerUnit Decimal  @map("berat_per_unit")
+  hargaPerGram Decimal  @map("harga_per_gram")
+  isActive     Boolean  @default(true) @map("is_active")
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  resepDetail ResepHppDetail[]
+
+  @@map("bahan_hpp")
+}
+
+model ResepHpp {
+  id          String   @id @default(uuid())
+  rasaKopiId  String   @map("rasa_kopi_id")
+  totalHpp    Decimal  @map("total_hpp")
+  isAktif     Boolean  @default(false) @map("is_aktif")
+  catatan     String?
+  createdById String   @map("created_by")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  rasaKopi    RasaKopi       @relation(fields: [rasaKopiId], references: [id])
+  createdBy   User           @relation(fields: [createdById], references: [id])
+  detail      ResepHppDetail[]
+
+  @@map("resep_hpp")
+}
+
+model ResepHppDetail {
+  id           String  @id @default(uuid())
+  resepId      String  @map("resep_id")
+  bahanHppId   String  @map("bahan_hpp_id")
+  jumlahPakai  Decimal @map("jumlah_pakai")
+  subtotal     Decimal
+
+  resep    ResepHpp @relation(fields: [resepId], references: [id], onDelete: Cascade)
+  bahanHpp BahanHpp @relation(fields: [bahanHppId], references: [id])
+
+  @@map("resep_hpp_detail")
 }
