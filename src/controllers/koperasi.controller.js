@@ -16,11 +16,16 @@ const getAllKoperasi = async (req, res) => {
 }
 
 const createKoperasi = async (req, res) => {
-  const { name, address, contactPerson, phone, minStockAlert } = req.body
+  const { name, address, contactPerson, phone, minStockAlert, hargaJualBotol, potonganPersen } = req.body
   if (!name) return res.status(400).json({ message: 'Nama koperasi wajib diisi' })
   try {
     const data = await prisma.koperasi.create({
-      data: { name, address, contactPerson, phone, minStockAlert: Number(minStockAlert || 20) }
+      data: {
+        name, address, contactPerson, phone,
+        minStockAlert: Number(minStockAlert || 20),
+        hargaJualBotol: Number(hargaJualBotol || 0),
+        potonganPersen: Number(potonganPersen || 10),
+      }
     })
     res.status(201).json({ message: 'Koperasi berhasil dibuat', data })
   } catch (err) {
@@ -30,11 +35,16 @@ const createKoperasi = async (req, res) => {
 
 const updateKoperasi = async (req, res) => {
   const { id } = req.params
-  const { name, address, contactPerson, phone, minStockAlert } = req.body
+  const { name, address, contactPerson, phone, minStockAlert, hargaJualBotol, potonganPersen } = req.body
   try {
     const data = await prisma.koperasi.update({
       where: { id },
-      data: { name, address, contactPerson, phone, minStockAlert: Number(minStockAlert || 20) }
+      data: {
+        name, address, contactPerson, phone,
+        minStockAlert: Number(minStockAlert || 20),
+        hargaJualBotol: Number(hargaJualBotol || 0),
+        potonganPersen: Number(potonganPersen || 10),
+      }
     })
     res.json({ message: 'Koperasi berhasil diupdate', data })
   } catch (err) {

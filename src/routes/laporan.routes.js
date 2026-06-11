@@ -1,6 +1,8 @@
-const express = require('express');
-const router = express.Router();
+const express = require('express')
+const router = express.Router()
+const auth = require('../middleware/auth.middleware')
+const { getLaporanMingguan } = require('../controllers/laporan.controller')
 
-router.get('/', (req, res) => res.json({ message: 'Laporan routes ok' }));
+router.get('/mingguan', auth, getLaporanMingguan)
 
-module.exports = router;
+module.exports = router

@@ -49,6 +49,8 @@ model Koperasi {
   contactPerson String?  @map("contact_person")
   phone         String?
   minStockAlert Int      @default(20) @map("min_stock_alert")
+  hargaJualBotol Decimal @default(0) @map("harga_jual_botol")
+  potonganPersen Decimal @default(10) @map("potongan_persen")
   isActive      Boolean  @default(true) @map("is_active")
   createdAt     DateTime @default(now()) @map("created_at")
 
