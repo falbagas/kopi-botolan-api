@@ -17,8 +17,50 @@ async function main() {
     }
   });
   console.log('Admin berhasil dibuat:', user.email);
+  
+  // 2. Buat Joandi
+  const hashJoandi = await bcrypt.hash('123456', 10)
+  await prisma.user.upsert({
+    where: {email: 'joandizakaria@gmail.com'},
+    update: {},
+    create: {
+      name: 'Joandi Zakaria',
+      email: 'joandizakaria@gmail.com',
+      passwordHash: hashJoandi,
+      role: 'ADMIN',
+    }
+  })
+  console.log('User admin berhasil dibuat:')
 
-  // 2. Buat jenis kopi
+  // 3. Buat King
+  const hashKing = await bcrypt.hashSync('123456', 10)
+  await prisma.user.upsert({
+    where: {email: 'kinghasbi898@gmail.com'},
+    update: {},
+    create: {
+      name: 'Muhammad King Hasbi Adiwangsa',
+      email: 'kinghasbi898@gmail.com',
+      passwordHash: hashKing,
+      role: 'ADMIN',
+    }
+  })
+  console.log('User admin berhasil dibuat:')
+
+  // 4. Buat Dinda
+  const hashDinda = await bcrypt.hashSync('123456', 10)
+  await prisma.user.upsert({
+    where: {email: 'dindanurikhwani@gmail.com'},
+    update: {},
+    create: {
+      name: 'Dinda Nur Ikhwani',
+      email: 'dindanurikhwani@gmail.com',
+      passwordHash: hashDinda,
+      role: 'ADMIN',
+    }
+  })
+  console.log('User admin berhasil dibuat:')
+
+  // 5. Buat jenis kopi
   const jenisKopiList = [
     'Kopi Gula Aren',
     'Kopi Hazelnut',
