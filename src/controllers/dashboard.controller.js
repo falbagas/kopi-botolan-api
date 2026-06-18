@@ -27,8 +27,10 @@ const getDashboard = async (req, res) => {
   }
 
   try {
-    const hpp = await prisma.hppHistory.findFirst({
-      orderBy: { berlakuDari: 'desc' }
+    // ── MENGGUNAKAN HPP BARU (RESEP AKTIF DARI HPP2) ──
+    const hpp = await prisma.resepHpp.findFirst({
+      where: { isAktif: true },
+      orderBy: { createdAt: 'desc' }
     })
     const hppPerBotol = hpp ? Number(hpp.totalHpp) : 0
 
