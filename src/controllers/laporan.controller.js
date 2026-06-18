@@ -15,8 +15,10 @@ const getLaporanMingguan = async (req, res) => {
   mingguDepan.setDate(senin.getDate() + 7)
 
   try {
-    const hpp = await prisma.hppHistory.findFirst({
-      orderBy: { berlakuDari: 'desc' }
+    // ── MENGGUNAKAN HPP BARU (RESEP AKTIF DARI HPP2) ──
+    const hpp = await prisma.resepHpp.findFirst({
+      where: { isAktif: true },
+      orderBy: { createdAt: 'desc' }
     })
     const hppPerBotol = hpp ? Number(hpp.totalHpp) : 0
 
@@ -32,7 +34,8 @@ const getLaporanMingguan = async (req, res) => {
         pengiriman: {
           where: {
             tanggalKirim: { gte: senin, lt: mingguDepan }
-          },
+          }
+        ,
           include: {
             detail: { include: { jenisKopi: true } }
           }
