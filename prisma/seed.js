@@ -60,6 +60,20 @@ async function main() {
   })
   console.log('User admin berhasil dibuat:')
 
+  // 5. Buat Kasir
+  const hashBiard = await bcrypt.hashSync('123456', 10)
+  await prisma.user.upsert({
+    where: {email: 'manajemenbns@gmail.com'},
+    update: {},
+    create: {
+      name: 'Manajemen',
+      email: 'manajemenbns@gmail.com',
+      passwordHash: hashBiard,
+      role: 'MANAJER',
+    }
+  })
+  console.log('user Manajer berhasil dibuat:')
+
   // 5. Buat jenis kopi
   const jenisKopiList = [
     'Kopi Gula Aren',
