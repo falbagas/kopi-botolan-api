@@ -14,7 +14,8 @@ const posRoutes = require('./src/routes/pos.routes');
 const produksiV2Routes = require('./src/routes/produksiV2.routes');
 const hpp2Routes = require('./src/routes/hpp2.routes');
 const dashboardRoutes = require('./src/routes/dashboard.routes');
-const userRoutes = require('./src/routes/user.routes')
+const userRoutes = require('./src/routes/user.routes');
+const freezerRoutes = require('./src/routes/freezer.routes')
 
 const app = express();
 
@@ -35,7 +36,8 @@ app.use('/api/pos', posRoutes);
 app.use('/api/produksi-v2', produksiV2Routes);
 app.use('/api/hpp2', hpp2Routes);
 app.use('/api/dashboard', dashboardRoutes);
-app.use('/api/users', userRoutes)
+app.use('/api/users', userRoutes);
+app.use('/api/freezer', freezerRoutes)
 
 
 app.use((req, res) => res.status(404).json({ message: 'Route tidak ditemukan' }));

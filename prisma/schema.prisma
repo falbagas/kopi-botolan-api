@@ -39,6 +39,7 @@ model User {
   transaksi       Transaksi[]
   produksi        Produksi[]
   resepHpp        ResepHpp[]
+  mutasiFreezer   MutasiFreezer[]
 
   @@map("users")
 }
@@ -306,6 +307,8 @@ model RasaKopi {
 
   produksiBotolan ProduksiBotolan[]
   resepHpp        ResepHpp[]
+  stokFreezer     StokFreezerV2[]
+  mutasi          MutasiFreezer[]
 
   @@map("rasa_kopi")
 }
@@ -396,4 +399,59 @@ model ResepHppDetail {
   bahanHpp BahanHpp @relation(fields: [bahanHppId], references: [id])
 
   @@map("resep_hpp_detail")
+}
+
+model Freezer {
+  id        String   @id @default(uuid())
+  nama      String   @unique
+  lokasi    String?
+  isActive  Boolean  @default(true) @map("is_active")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  stokFreezer    StokFreezerV2[]
+  mutasiFreezer  MutasiFreezer[]
+  mutasiDari     MutasiFreezer[] @relation("FreezertDari")
+
+  @@map("freezer")
+}
+
+model StokFreezerV2 {
+  id          String   @id @default(uuid())
+  freezerId   String   @map("freezer_id")
+  rasaKopiId  String   @map("rasa_kopi_id")
+  jumlah      Int      @default(0)
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  freezer    Freezer  @relation(fields: [freezerId], references: [id])
+  rasaKopi   RasaKopi @relation(fields: [rasaKopiId], references: [id])
+
+  @@unique([freezerId, rasaKopiId])
+  @@map("stok_freezer_v2")
+}
+
+enum JenisMutasi {
+  MASUK_PRODUKSI
+  KELUAR_KOPERASI
+  PINDAH_KELUAR
+  PINDAH_MASUK
+}
+
+model MutasiFreezer {
+  id           String      @id @default(uuid())
+  freezerId    String      @map("freezer_id")
+  freezerTujuanId String?  @map("freezer_tujuan_id")
+  rasaKopiId   String      @map("rasa_kopi_id")
+  jenis        JenisMutasi
+  jumlah       Int
+  keterangan   String?
+  produksiId   String?     @map("produksi_id")
+  createdById  String      @map("created_by")
+  createdAt    DateTime    @default(now()) @map("created_at")
+
+  freezer        Freezer   @relation(fields: [freezerId], references: [id])
+  freezerTujuan  Freezer?  @relation("FreezertDari", fields: [freezerTujuanId], references: [id])
+  rasaKopi       RasaKopi  @relation(fields: [rasaKopiId], references: [id])
+  createdBy      User      @relation(fields: [createdById], references: [id])
+
+  @@map("mutasi_freezer")
 }

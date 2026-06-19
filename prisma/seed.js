@@ -93,6 +93,17 @@ async function main() {
     })
   }
   console.log('Jenis kopi berhasil dibuat')
+
+  // Buat Freezer 
+  const freezerList = ['Freezer 1', 'Freezer 2', 'Freezer 3']
+  for (const nama of freezerList) {
+    await prisma.freezer.upsert({
+      where: { nama },
+      update: {},
+      create: { nama }
+    })
+  }
+  console.log('Freezer berhasil dibuat')
 }
 
 main().catch(console.error).finally(() => prisma.$disconnect());
