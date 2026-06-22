@@ -40,6 +40,8 @@ model User {
   produksi        Produksi[]
   resepHpp        ResepHpp[]
   mutasiFreezer   MutasiFreezer[]
+  pembagianLaba   PembagianLaba[]
+  mutasiLaba      MutasiLaba[]
 
   @@map("users")
 }
@@ -454,4 +456,57 @@ model MutasiFreezer {
   createdBy      User      @relation(fields: [createdById], references: [id])
 
   @@map("mutasi_freezer")
+}
+
+enum JenisMutasiLaba {
+  LABA_MASUK
+  PENARIKAN
+  KOREKSI
+}
+
+model Pemilik {
+  id         String   @id @default(uuid())
+  nama       String
+  persentase Decimal  @default(0) @map("persentase")
+  saldo      Decimal  @default(0)
+  isActive   Boolean  @default(true) @map("is_active")
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  mutasi MutasiLaba[]
+
+  @@map("pemilik")
+}
+
+model PembagianLaba {
+  id          String   @id @default(uuid())
+  periodeAwal DateTime @map("periode_awal")
+  periodeAkhir DateTime @map("periode_akhir")
+  totalLaba   Decimal  @map("total_laba")
+  keterangan  String?
+  createdById String   @map("created_by")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  createdBy User         @relation(fields: [createdById], references: [id])
+  mutasi    MutasiLaba[]
+
+  @@map("pembagian_laba")
+}
+
+model MutasiLaba {
+  id              String          @id @default(uuid())
+  pemilikId       String          @map("pemilik_id")
+  pembagianLabaId String?         @map("pembagian_laba_id")
+  jenis           JenisMutasiLaba
+  jumlah          Decimal
+  saldoSebelum    Decimal         @map("saldo_sebelum")
+  saldoSesudah    Decimal         @map("saldo_sesudah")
+  keterangan      String?
+  createdById     String          @map("created_by")
+  createdAt       DateTime        @default(now()) @map("created_at")
+
+  pemilik       Pemilik        @relation(fields: [pemilikId], references: [id])
+  pembagianLaba PembagianLaba? @relation(fields: [pembagianLabaId], references: [id])
+  createdBy     User           @relation(fields: [createdById], references: [id])
+
+  @@map("mutasi_laba")
 }

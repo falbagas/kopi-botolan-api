@@ -1,109 +1,85 @@
-const { PrismaClient } = require('@prisma/client');
-const bcrypt = require('bcryptjs');
+import { PrismaClient } from '@prisma/client'
+import bcrypt from 'bcryptjs'
 
-const prisma = new PrismaClient();
+const prisma = new PrismaClient()
 
 async function main() {
-  // 1. Buat admin
-  const hash = await bcrypt.hash('admin123', 10);
-  const user = await prisma.user.upsert({
+  // 1. Admin
+  const hash = await bcrypt.hash('admin123', 10)
+  await prisma.user.upsert({
     where: { email: 'admin@kopibotolan.com' },
     update: {},
-    create: {
-      name: 'Admin Pusat',
-      email: 'admin@kopibotolan.com',
-      passwordHash: hash,
-      role: 'ADMIN',
-    }
-  });
-  console.log('Admin berhasil dibuat:', user.email);
-  
-  // 2. Buat Joandi
+    create: { name: 'Admin Pusat', email: 'admin@kopibotolan.com', passwordHash: hash, role: 'ADMIN' }
+  })
+  console.log('Admin berhasil dibuat')
+
+  // 2. Joandi
   const hashJoandi = await bcrypt.hash('123456', 10)
   await prisma.user.upsert({
-    where: {email: 'joandizakaria@gmail.com'},
+    where: { email: 'joandizakaria@gmail.com' },
     update: {},
-    create: {
-      name: 'Joandi Zakaria',
-      email: 'joandizakaria@gmail.com',
-      passwordHash: hashJoandi,
-      role: 'ADMIN',
-    }
+    create: { name: 'Joandi Zakaria', email: 'joandizakaria@gmail.com', passwordHash: hashJoandi, role: 'ADMIN' }
   })
-  console.log('User admin berhasil dibuat:')
+  console.log('Joandi berhasil dibuat')
 
-  // 3. Buat King
-  const hashKing = await bcrypt.hashSync('123456', 10)
+  // 3. King
+  const hashKing = await bcrypt.hash('123456', 10)
   await prisma.user.upsert({
-    where: {email: 'kinghasbi898@gmail.com'},
+    where: { email: 'kinghasbi898@gmail.com' },
     update: {},
-    create: {
-      name: 'Muhammad King Hasbi Adiwangsa',
-      email: 'kinghasbi898@gmail.com',
-      passwordHash: hashKing,
-      role: 'ADMIN',
-    }
+    create: { name: 'Muhammad King Hasbi Adiwangsa', email: 'kinghasbi898@gmail.com', passwordHash: hashKing, role: 'ADMIN' }
   })
-  console.log('User admin berhasil dibuat:')
+  console.log('King berhasil dibuat')
 
-  // 4. Buat Dinda
-  const hashDinda = await bcrypt.hashSync('123456', 10)
+  // 4. Dinda
+  const hashDinda = await bcrypt.hash('123456', 10)
   await prisma.user.upsert({
-    where: {email: 'dindanurikhwani@gmail.com'},
+    where: { email: 'dindanurikhwani@gmail.com' },
     update: {},
-    create: {
-      name: 'Dinda Nur Ikhwani',
-      email: 'dindanurikhwani@gmail.com',
-      passwordHash: hashDinda,
-      role: 'ADMIN',
-    }
+    create: { name: 'Dinda Nur Ikhwani', email: 'dindanurikhwani@gmail.com', passwordHash: hashDinda, role: 'ADMIN' }
   })
-  console.log('User admin berhasil dibuat:')
+  console.log('Dinda berhasil dibuat')
 
-  // 5. Buat Kasir
-  const hashBiard = await bcrypt.hashSync('123456', 10)
+  // 5. Manajer
+  const hashManajer = await bcrypt.hash('123456', 10)
   await prisma.user.upsert({
-    where: {email: 'manajemenbns@gmail.com'},
+    where: { email: 'manajemenbns@gmail.com' },
     update: {},
-    create: {
-      name: 'Manajemen',
-      email: 'manajemenbns@gmail.com',
-      passwordHash: hashBiard,
-      role: 'MANAJER',
-    }
+    create: { name: 'Manajemen', email: 'manajemenbns@gmail.com', passwordHash: hashManajer, role: 'MANAJER' }
   })
-  console.log('user Manajer berhasil dibuat:')
+  console.log('Manajer berhasil dibuat')
 
-  // 5. Buat jenis kopi
+  // 6. Jenis kopi
   const jenisKopiList = [
-    'Kopi Gula Aren',
-    'Kopi Hazelnut',
-    'Kopi Vanila',
-    'Kopi Salted Caramel',
-    'Kopi Americano',
-    'Kopi Matcha',
-    'Kopi Taro',
-    'Kopi Coklat',
+    'Kopi Gula Aren', 'Kopi Hazelnut', 'Kopi Vanila',
+    'Kopi Salted Caramel', 'Kopi Americano', 'Kopi Matcha',
+    'Kopi Taro', 'Kopi Coklat',
   ]
   for (const nama of jenisKopiList) {
-    await prisma.jenisKopi.upsert({
-      where: { nama },
-      update: {},
-      create: { nama }
-    })
+    await prisma.jenisKopi.upsert({ where: { nama }, update: {}, create: { nama } })
   }
   console.log('Jenis kopi berhasil dibuat')
 
-  // Buat Freezer 
+  // 7. Freezer
   const freezerList = ['Freezer 1', 'Freezer 2', 'Freezer 3']
   for (const nama of freezerList) {
-    await prisma.freezer.upsert({
-      where: { nama },
-      update: {},
-      create: { nama }
-    })
+    await prisma.freezer.upsert({ where: { nama }, update: {}, create: { nama } })
   }
   console.log('Freezer berhasil dibuat')
+
+  // 8. Pemilik
+  const pemilikList = [
+    { nama: 'Pemilik 1', persentase: 40 },
+    { nama: 'Pemilik 2', persentase: 40 },
+    { nama: 'Pemilik 3', persentase: 20 },
+  ]
+  for (const p of pemilikList) {
+    const exist = await prisma.pemilik.findFirst({ where: { nama: p.nama } })
+    if (!exist) {
+      await prisma.pemilik.create({ data: { nama: p.nama, persentase: p.persentase } })
+    }
+  }
+  console.log('Pemilik berhasil dibuat')
 }
 
-main().catch(console.error).finally(() => prisma.$disconnect());
+main().catch(console.error).finally(() => prisma.$disconnect())
