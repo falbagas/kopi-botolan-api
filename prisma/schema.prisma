@@ -465,12 +465,14 @@ enum JenisMutasiLaba {
 }
 
 model Pemilik {
-  id         String   @id @default(uuid())
-  nama       String
-  persentase Decimal  @default(0) @map("persentase")
-  saldo      Decimal  @default(0)
-  isActive   Boolean  @default(true) @map("is_active")
-  createdAt  DateTime @default(now()) @map("created_at")
+  id                String   @id @default(uuid())
+  nama              String
+  persentase        Decimal  @default(0)
+  persentaseKoperasi Decimal @default(0) @map("persentase_koperasi")
+  persentasePos     Decimal  @default(0) @map("persentase_pos")
+  saldo             Decimal  @default(0)
+  isActive          Boolean  @default(true) @map("is_active")
+  createdAt         DateTime @default(now()) @map("created_at")
 
   mutasi MutasiLaba[]
 

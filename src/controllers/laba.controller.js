@@ -1,5 +1,6 @@
 const { PrismaClient } = require('@prisma/client')
 const prisma = new PrismaClient()
+const formatRp = (val) => 'Rp ' + Number(val).toLocaleString('id-ID')
 
 // ── PEMILIK ───────────────────────────────────────────
 
@@ -24,11 +25,15 @@ const getAllPemilik = async (req, res) => {
 
 const updatePemilik = async (req, res) => {
   const { id } = req.params
-  const { nama, persentase } = req.body
+  const { nama, persentaseKoperasi, persentasePos } = req.body
   try {
     const data = await prisma.pemilik.update({
       where: { id },
-      data: { nama, persentase: Number(persentase) }
+      data: {
+        nama,
+        persentaseKoperasi: Number(persentaseKoperasi),
+        persentasePos: Number(persentasePos),
+      }
     })
     res.json({ message: 'Pemilik berhasil diupdate', data })
   } catch (err) {
@@ -130,7 +135,9 @@ const bagikanLaba = async (req, res) => {
       })
 
       for (const pemilik of pemilikList) {
-        const bagian = totalLaba * (Number(pemilik.persentase) / 100)
+        const bagianKoperasi = labaKoperasi * (Number(pemilik.persentaseKoperasi) / 100)
+        const bagianPos = labaPos * (Number(pemilik.persentasePos) / 100)
+        const bagian = bagianKoperasi + bagianPos
         const saldoSebelum = Number(pemilik.saldo)
         const saldoSesudah = saldoSebelum + bagian
 
@@ -147,7 +154,7 @@ const bagikanLaba = async (req, res) => {
             jumlah: bagian,
             saldoSebelum,
             saldoSesudah,
-            keterangan: `Laba periode ${new Date(periodeAwal).toLocaleDateString('id-ID')} - ${new Date(periodeAkhir).toLocaleDateString('id-ID')}`,
+            keterangan: `Laba koperasi ${formatRp(bagianKoperasi)} + POS ${formatRp(bagianPos)}`,
             createdById: req.user.id
           }
         })
@@ -271,8 +278,11 @@ const previewLaba = async (req, res) => {
       pembagian: pemilikList.map(p => ({
         id: p.id,
         nama: p.nama,
-        persentase: Number(p.persentase),
-        bagian: totalLaba * (Number(p.persentase) / 100),
+        persentaseKoperasi: Number(p.persentaseKoperasi),
+        persentasePos: Number(p.persentasePos),
+        bagianKoperasi: labaKoperasi * (Number(p.persentaseKoperasi) / 100),
+        bagianPos: labaPos * (Number(p.persentasePos) / 100),
+        bagian: (labaKoperasi * (Number(p.persentaseKoperasi) / 100)) + (labaPos * (Number(p.persentasePos) / 100)),
         saldoSaatIni: Number(p.saldo)
       }))
     })

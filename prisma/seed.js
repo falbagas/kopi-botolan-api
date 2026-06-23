@@ -69,17 +69,31 @@ async function main() {
 
   // 8. Pemilik
   const pemilikList = [
-    { nama: 'Pemilik 1', persentase: 40 },
-    { nama: 'Pemilik 2', persentase: 40 },
-    { nama: 'Pemilik 3', persentase: 20 },
-  ]
-  for (const p of pemilikList) {
-    const exist = await prisma.pemilik.findFirst({ where: { nama: p.nama } })
-    if (!exist) {
-      await prisma.pemilik.create({ data: { nama: p.nama, persentase: p.persentase } })
-    }
+  { nama: 'Pemilik 1', persentase: 40, persentaseKoperasi: 40, persentasePos: 33.4 },
+  { nama: 'Pemilik 2', persentase: 40, persentaseKoperasi: 40, persentasePos: 33.3 },
+  { nama: 'Pemilik 3', persentase: 20, persentaseKoperasi: 20, persentasePos: 33.3 },
+]
+for (const p of pemilikList) {
+  const exist = await prisma.pemilik.findFirst({ where: { nama: p.nama } })
+  if (!exist) {
+    await prisma.pemilik.create({
+      data: {
+        nama: p.nama,
+        persentase: p.persentase,
+        persentaseKoperasi: p.persentaseKoperasi,
+        persentasePos: p.persentasePos
+      }
+    })
+  } else {
+    await prisma.pemilik.update({
+      where: { id: exist.id },
+      data: {
+        persentaseKoperasi: p.persentaseKoperasi,
+        persentasePos: p.persentasePos
+      }
+    })
   }
-  console.log('Pemilik berhasil dibuat')
+}
 }
 
 main().catch(console.error).finally(() => prisma.$disconnect())
